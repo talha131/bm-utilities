@@ -16,29 +16,46 @@ func main() {
 	outputFormat := flag.String("o", "wav", "output format. wav|mp3")
 	flag.Parse()
 
-	cmd := "ffmpeg"
+	var input []string
+	var output []string
 
 	for i := 0; i < len(flag.Args()); i++ {
 		file := flag.Args()[i]
 
 		if isFileAudio(file, *isVerbose) {
-			name := strings.TrimSuffix(file, filepath.Ext(file))
-			output := name + "." + *outputFormat
-			cmd := exec.Command(cmd,
-				"-i", file,
-				"-ac", "1",
-				"-ab", "64k",
-				"-ar", "44100",
-				output)
-			cmd.Stderr = os.Stderr
-			cmd.Stdout = os.Stdout
+			input = append(input, "-i")
+			input = append(input, file)
 
-			err := cmd.Run()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				continue
-			}
+			name := strings.TrimSuffix(file, filepath.Ext(file))
+			outputName := name + "." + *outputFormat
+
+			output = append(output, "-map")
+			output = append(output, fmt.Sprintf("%v", len(output)/4))
+
+			output = append(output, "-f")
+			output = append(output, *outputFormat)
+
+			output = append(output, outputName)
+
 		}
+	}
+
+	convertFiles(input, output)
+}
+
+func convertFiles(input []string, output []string) {
+
+	cmd := exec.Command("ffmpeg",
+		"-ac", "1",
+		"-ab", "64k",
+		"-ar", "44100",
+		strings.Join(input, " "),
+		strings.Join(output, " "))
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 	}
 }
 
