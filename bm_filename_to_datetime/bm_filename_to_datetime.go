@@ -14,19 +14,19 @@ func main() {
 		ext := strings.ToLower(filepath.Ext(file))
 
 		// Get file stats
-		info, err := os.Stat(file)
+		fileInfo, err := os.Stat(file)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
 
 		// Skip if it is a directory
-		if info.IsDir() {
+		if fileInfo.IsDir() {
 			continue
 		}
 
 		// Create new name
-		time := info.ModTime().Format("2006-01-02 150405")
+		time := fileInfo.ModTime().Format("2006-01-02 150405")
 		newName := time + ext
 
 		// Rename
