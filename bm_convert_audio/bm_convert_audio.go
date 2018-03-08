@@ -45,7 +45,8 @@ func convertFile(input string, output string) {
 }
 
 func isFileAudio(file string, isVerbose bool) bool {
-	mimeType := "audio/mpeg"
+	mimeTypeMp3 := "audio/mpeg"
+	mimeTypeWav := "audio/x-wav"
 	// Get file stats
 	fileInfo, err := os.Stat(file)
 	if err != nil {
@@ -62,7 +63,7 @@ func isFileAudio(file string, isVerbose bool) bool {
 
 	ext := strings.ToLower(filepath.Ext(file))
 	fileType := mime.TypeByExtension(ext)
-	if fileType != mimeType {
+	if fileType != mimeTypeMp3 && fileType != mimeTypeWav {
 		if isVerbose {
 			fmt.Printf("Skipping %v \t %v\n", fileInfo.Name(), fileType)
 		}
