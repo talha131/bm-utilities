@@ -17,7 +17,6 @@ func main() {
 	flag.Parse()
 
 	cmd := "ffmpeg"
-	cmdArgs := "-ac 1 -ab 64k -ar 44100"
 
 	for i := 0; i < len(flag.Args()); i++ {
 		file := flag.Args()[i]
@@ -25,7 +24,16 @@ func main() {
 		if isFileAudio(file, *isVerbose) {
 			name := strings.TrimSuffix(file, filepath.Ext(file))
 			output := name + "." + *outputFormat
-			_, err := exec.Command(cmd, "-i", file, cmdArgs, output).Output()
+			cmd := exec.Command(cmd,
+				"-i", file,
+				"-ac", "1",
+				"-ab", "64k",
+				"-ar", "44100",
+				output)
+			cmd.Stderr = os.Stderr
+			cmd.Stdout = os.Stdout
+
+			err := cmd.Run()
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				continue
