@@ -41,7 +41,7 @@ func main() {
 		}
 
 		// Rename
-		// err = os.Rename(file, newName)
+		err = os.Rename(file, newName)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue
