@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,9 +11,11 @@ import (
 func main() {
 
 	nameFormat := "2006-01-02 150405"
+	isVerbose := flag.Bool("v", false, "verbose")
+	flag.Parse()
 
-	for i := 1; i < len(os.Args); i++ {
-		file := os.Args[i]
+	for i := 1; i < len(flag.Args()); i++ {
+		file := flag.Args()[i]
 		ext := strings.ToLower(filepath.Ext(file))
 
 		// Get file stats
@@ -24,15 +27,21 @@ func main() {
 
 		// Skip if it is a directory
 		if fileInfo.IsDir() {
+			if *isVerbose {
+				fmt.Printf("Skipping %v\n", fileInfo.Name())
+			}
 			continue
 		}
 
 		// Create new name
 		time := fileInfo.ModTime().Format(nameFormat)
 		newName := time + ext
+		if *isVerbose {
+			fmt.Printf("Rename %v to %v\n", fileInfo.Name(), newName)
+		}
 
 		// Rename
-		err = os.Rename(file, newName)
+		// err = os.Rename(file, newName)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			continue
