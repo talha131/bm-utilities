@@ -14,7 +14,7 @@ func main() {
 	isVerbose := flag.Bool("v", false, "verbose")
 	flag.Parse()
 
-	for i := 1; i < len(flag.Args()); i++ {
+	for i := 0; i < len(flag.Args()); i++ {
 		file := flag.Args()[i]
 		ext := strings.ToLower(filepath.Ext(file))
 
