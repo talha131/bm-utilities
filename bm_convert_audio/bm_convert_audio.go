@@ -24,10 +24,10 @@ func main() {
 
 		if isFileAudio(file, *isVerbose) {
 			input = append(input, "-i")
-			input = append(input, file)
+			input = append(input, "\u0022"+file+"\u0022")
 
 			name := strings.TrimSuffix(file, filepath.Ext(file))
-			outputName := name + "." + *outputFormat
+			outputName := "\u0022" + name + "." + *outputFormat + "\u0022"
 
 			output = append(output, "-map")
 			output = append(output, fmt.Sprintf("%v", len(output)/4))
@@ -46,10 +46,10 @@ func main() {
 func convertFiles(input []string, output []string) {
 
 	cmd := exec.Command("ffmpeg",
+		strings.Join(input, " "),
 		"-ac", "1",
 		"-ab", "64k",
 		"-ar", "44100",
-		strings.Join(input, " "),
 		strings.Join(output, " "))
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
