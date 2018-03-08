@@ -9,6 +9,8 @@ import (
 
 func main() {
 
+	nameFormat := "2006-01-02 150405"
+
 	for i := 1; i < len(os.Args); i++ {
 		file := os.Args[i]
 		ext := strings.ToLower(filepath.Ext(file))
@@ -26,7 +28,7 @@ func main() {
 		}
 
 		// Create new name
-		time := fileInfo.ModTime().Format("2006-01-02 150405")
+		time := fileInfo.ModTime().Format(nameFormat)
 		newName := time + ext
 
 		// Rename
