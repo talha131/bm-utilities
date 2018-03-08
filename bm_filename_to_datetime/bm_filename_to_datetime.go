@@ -11,6 +11,7 @@ import (
 func main() {
 
 	nameFormat := "2006-01-02 150405"
+
 	isVerbose := flag.Bool("v", false, "verbose")
 	flag.Parse()
 
