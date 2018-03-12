@@ -48,8 +48,9 @@ $ bmtool audio convert -f mp3 example.wav
 It will convert "example.wav" to "example.mp3"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		format, _ := audioCmd.Flags().GetString("format")
+		format, _ := cmd.Flags().GetString("format")
 		if format != "mp3" && format != "wav" {
+			fmt.Fprintf(os.Stderr, "Unknown format %v. Valid values are [mp3|wav]\n", format)
 			return
 		}
 
