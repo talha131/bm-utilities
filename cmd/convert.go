@@ -52,5 +52,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// convertCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	convertCmd.Flags().StringP("format", "f", "wav", "Output format. [wav|mp3]")
 }
