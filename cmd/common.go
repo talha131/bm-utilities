@@ -32,7 +32,7 @@ var (
 	mimeTypeMp3 = "audio/mpeg"
 	mimeTypeWav = "audio/x-wav"
 	app         = "ffmpeg"
-	wavOption   = []string{"-c:a", "pcm_s16le", "-ac", "1", "-ar", "44100"}
+	wavOption   = []string{"pcm_s16le", "-ac", "1", "-ar", "44100"}
 	mp3Option   = []string{"-ac", "1", "-ar", "44100", "-b:a", "64k"}
 )
 
