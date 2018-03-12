@@ -22,6 +22,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
@@ -46,7 +48,17 @@ $ bmtool audio convert -f mp3 example.wav
 It will convert "example.wav" to "example.mp3"
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("convert called")
+		format, _ := audioCmd.Flags().GetString("format")
+		if format != "mp3" && format != "wav" {
+			return
+		}
+
+		for _, e := range args {
+			if IsFileAudio(e) {
+				convertFile(e, GetFileNameWithoutExtension(e)+"."+format)
+			}
+		}
+
 	},
 }
 
@@ -54,4 +66,20 @@ func init() {
 	audioCmd.AddCommand(convertCmd)
 
 	convertCmd.Flags().StringP("format", "f", "wav", "Output format. [wav|mp3]")
+}
+
+func convertFile(input string, output string) {
+
+	cmd := exec.Command("ffmpeg",
+		"-i", input,
+		"-ac", "1",
+		"-ab", "64k",
+		"-ar", "44100",
+		output)
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 }
