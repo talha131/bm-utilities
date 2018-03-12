@@ -35,10 +35,10 @@ var renameCmd = &cobra.Command{
 	Short: "Rename file to its ModTime",
 	Long: `Rename file to the modification time of file.
 
-	Example:
+Usage:
 
-	$ bmtool file rename example.mp3 
-	This will rename "example.mp3" to "2016-11-04 130738.mp3"
+$ bmtool file rename example.mp3 
+This will rename "example.mp3" to "2016-11-04 130738.mp3"
 `,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
