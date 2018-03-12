@@ -47,7 +47,7 @@ This will rename "example.mp3" to "2016-11-04 130738.mp3"
 			if err == nil {
 
 				n :=
-					getNewName(fi.ModTime(), GetFileExtension(e))
+					getNewName(fi.ModTime(), getFileExtension(e))
 				rename(e, n)
 			}
 

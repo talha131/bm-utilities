@@ -33,18 +33,18 @@ var (
 	mimeTypeWav = "audio/x-wav"
 )
 
-// GetFileExtension returns file extension from file name
-func GetFileExtension(file string) string {
+// getFileExtension returns file extension from file name
+func getFileExtension(file string) string {
 	return strings.ToLower(filepath.Ext(file))
 }
 
-// GetFileNameWithoutExtension returns file name sans extension
-func GetFileNameWithoutExtension(file string) string {
+// getFileNameWithoutExtension returns file name sans extension
+func getFileNameWithoutExtension(file string) string {
 	return strings.TrimSuffix(file, filepath.Ext(file))
 }
 
-// IsFileAudio checks if file is mp3 or wav using mime type
-func IsFileAudio(file string) bool {
+// isFileAudio checks if file is mp3 or wav using mime type
+func isFileAudio(file string) bool {
 	fi, err := os.Stat(file)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -58,7 +58,7 @@ func IsFileAudio(file string) bool {
 		return false
 	}
 
-	fileType := mime.TypeByExtension(GetFileExtension(file))
+	fileType := mime.TypeByExtension(getFileExtension(file))
 
 	if fileType != mimeTypeMp3 && fileType != mimeTypeWav {
 		if v, _ := rootCmd.Flags().GetBool("verbose"); v {

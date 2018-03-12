@@ -55,8 +55,8 @@ It will convert "example.wav" to "example.mp3"
 		}
 
 		for _, e := range args {
-			if IsFileAudio(e) {
-				convertFile(e, GetFileNameWithoutExtension(e)+"."+format)
+			if isFileAudio(e) {
+				convertFile(e, getFileNameWithoutExtension(e)+"."+format)
 			}
 		}
 
