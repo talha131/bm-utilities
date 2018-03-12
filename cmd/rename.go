@@ -15,7 +15,12 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -23,15 +28,27 @@ import (
 // renameCmd represents the rename command
 var renameCmd = &cobra.Command{
 	Use:   "rename",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Rename file to its ModTime",
+	Long: `Rename file to the modification time of file.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Example:
+
+	$ bmtool file rename example.mp3 
+	This will rename "example.mp3" to "2016-11-04 130738.mp3"
+`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("rename called")
+		for _, e := range args {
+			fi, err := getFileInfo(e)
+			if err == nil {
+
+				ext := strings.ToLower(filepath.Ext(e))
+				n :=
+					getNewName(fi.ModTime(), ext)
+				rename(e, n)
+			}
+
+		}
 	},
 }
 
@@ -47,4 +64,39 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// renameCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func rename(file string, newName string) {
+	err := os.Rename(file, newName)
+	if Verbose {
+		fmt.Printf("Rename %v to %v\n", file, newName)
+	}
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+}
+
+func getNewName(t time.Time, ext string) string {
+	nameFormat := "2006-01-02 150405"
+	return t.Format(nameFormat) + ext
+}
+
+func getFileInfo(file string) (os.FileInfo, error) {
+
+	var fi os.FileInfo
+
+	// Get file stats
+	fi, err := os.Stat(file)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return fi, err
+	}
+
+	if fi.IsDir() {
+		if Verbose {
+			fmt.Printf("Skipping %v\n", fi.Name())
+		}
+		return fi, errors.New("Is not a file")
+	}
+	return fi, nil
 }
