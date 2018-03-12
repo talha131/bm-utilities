@@ -56,7 +56,7 @@ It will convert "example.wav" to "example.mp3"
 
 		for _, e := range args {
 			if isFileAudio(e) {
-				convertFile(e, getFileNameWithoutExtension(e)+"."+format)
+				convertFile(e, getFileNameWithoutExtension(e)+"."+format, format)
 			}
 		}
 
@@ -69,14 +69,19 @@ func init() {
 	convertCmd.Flags().StringP("format", "f", "wav", "Output format. [wav|mp3]")
 }
 
-func convertFile(input string, output string) {
+func convertFile(input string, output string, format string) {
 
-	cmd := exec.Command("ffmpeg",
-		"-i", input,
-		"-ac", "1",
-		"-b:a", "64k",
-		"-ar", "44100",
-		output)
+	a := []string{"-i", input}
+	if format == "wav" {
+		a = append(a, wavOption...)
+	} else {
+		a = append(a, mp3Option...)
+	}
+
+	a = append(a, output)
+
+	cmd := exec.Command(app, a...)
+
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	err := cmd.Run()
