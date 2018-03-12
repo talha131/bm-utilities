@@ -21,11 +21,46 @@
 package cmd
 
 import (
+	"fmt"
+	"mime"
+	"os"
 	"path/filepath"
 	"strings"
+)
+
+var (
+	mimeTypeMp3 = "audio/mpeg"
+	mimeTypeWav = "audio/x-wav"
 )
 
 // GetFileExtension returns file extension from file name
 func GetFileExtension(file string) string {
 	return strings.ToLower(filepath.Ext(file))
+}
+
+// IsFileAudio checks if file is mp3 or wav using mime type
+func IsFileAudio(file string) bool {
+	fi, err := os.Stat(file)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return false
+	}
+
+	if fi.IsDir() {
+		if v, _ := rootCmd.Flags().GetBool("verbose"); v {
+			fmt.Printf("%v \t direcotry\n", fi.Name())
+		}
+		return false
+	}
+
+	fileType := mime.TypeByExtension(GetFileExtension(file))
+
+	if fileType != mimeTypeMp3 && fileType != mimeTypeWav {
+		if v, _ := rootCmd.Flags().GetBool("verbose"); v {
+			fmt.Printf("%v \t %v\n", fi.Name(), fileType)
+		}
+		return false
+	}
+
+	return true
 }
