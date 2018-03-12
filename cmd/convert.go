@@ -29,13 +29,22 @@ import (
 // convertCmd represents the convert command
 var convertCmd = &cobra.Command{
 	Use:   "convert",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Convert audio file to wav or mp3",
+	Long: `Convert audio file to wav or mp3 format.
+Alongwith format conversion, it also
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+1. Convert stereo to mono
+2. Set audio sample frequency to 44100
+3. Set mp3 bit rate to 64k
+
+It creates output in the same directory with same name except the new extension.
+You must make sure directory does not already have a file with the same name.
+
+Usage:
+$ bmtool audio convert -f mp3 example.wav
+
+It will convert "example.wav" to "example.mp3"
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("convert called")
 	},
@@ -44,13 +53,5 @@ to quickly create a Cobra application.`,
 func init() {
 	audioCmd.AddCommand(convertCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// convertCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	convertCmd.Flags().StringP("format", "f", "wav", "Output format. [wav|mp3]")
 }
