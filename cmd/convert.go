@@ -74,7 +74,7 @@ func convertFile(input string, output string) {
 	cmd := exec.Command("ffmpeg",
 		"-i", input,
 		"-ac", "1",
-		"-ab", "64k",
+		"-b:a", "64k",
 		"-ar", "44100",
 		output)
 	cmd.Stderr = os.Stderr
