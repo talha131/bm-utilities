@@ -54,10 +54,22 @@ It will convert "example.wav" to "example.mp3"
 			return
 		}
 
+		var (
+			input  []string
+			output []string
+		)
+
 		for _, e := range args {
 			if isFileAudio(e) {
-				convertFile(e, getFileNameWithoutExtension(e)+"."+format, format)
+				input = append(input, "-i", e)
+				output = append(output, "-map",
+					fmt.Sprintf("%d:0", len(input)/3),
+					getFileNameWithoutExtension(e)+"."+format)
 			}
+		}
+
+		if len(input) > 0 && len(output) > 0 {
+			convertFile(input, output, format)
 		}
 
 	},
@@ -69,16 +81,21 @@ func init() {
 	convertCmd.Flags().StringP("format", "f", "wav", "Output format. [mp3|wav]")
 }
 
-func convertFile(input string, output string, format string) {
+func convertFile(input []string, output []string, format string) {
 
-	a := []string{"-i", input}
+	var a []string
+
+	a = append(a, input...)
+
 	if format == "wav" {
 		a = append(a, wavOption...)
 	} else {
 		a = append(a, mp3Option...)
 	}
 
-	a = append(a, output)
+	a = append(a, output...)
+
+	fmt.Println(a)
 
 	cmd := exec.Command(app, a...)
 
