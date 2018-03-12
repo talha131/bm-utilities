@@ -24,8 +24,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -48,9 +46,8 @@ var renameCmd = &cobra.Command{
 			fi, err := getFileInfo(e)
 			if err == nil {
 
-				ext := strings.ToLower(filepath.Ext(e))
 				n :=
-					getNewName(fi.ModTime(), ext)
+					getNewName(fi.ModTime(), GetFileExtension(e))
 				rename(e, n)
 			}
 
