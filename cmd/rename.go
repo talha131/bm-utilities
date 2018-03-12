@@ -68,7 +68,7 @@ func init() {
 
 func rename(file string, newName string) {
 	err := os.Rename(file, newName)
-	if Verbose {
+	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
 		fmt.Printf("Rename %v to %v\n", file, newName)
 	}
 	if err != nil {
@@ -93,7 +93,7 @@ func getFileInfo(file string) (os.FileInfo, error) {
 	}
 
 	if fi.IsDir() {
-		if Verbose {
+		if v, _ := rootCmd.Flags().GetBool("verbose"); v {
 			fmt.Printf("Skipping %v\n", fi.Name())
 		}
 		return fi, errors.New("Is not a file")
