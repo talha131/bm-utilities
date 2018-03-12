@@ -66,7 +66,7 @@ It will convert "example.wav" to "example.mp3"
 func init() {
 	audioCmd.AddCommand(convertCmd)
 
-	convertCmd.Flags().StringP("format", "f", "wav", "Output format. [wav|mp3]")
+	convertCmd.Flags().StringP("format", "f", "wav", "Output format. [mp3|wav]")
 }
 
 func convertFile(input string, output string, format string) {
