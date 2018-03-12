@@ -38,6 +38,11 @@ func GetFileExtension(file string) string {
 	return strings.ToLower(filepath.Ext(file))
 }
 
+// GetFileNameWithoutExtension returns file name sans extension
+func GetFileNameWithoutExtension(file string) string {
+	return strings.TrimSuffix(file, filepath.Ext(file))
+}
+
 // IsFileAudio checks if file is mp3 or wav using mime type
 func IsFileAudio(file string) bool {
 	fi, err := os.Stat(file)
