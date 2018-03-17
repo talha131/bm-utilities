@@ -37,7 +37,7 @@ Alongwith format conversion, it also
 
 1. Convert stereo to mono
 2. Set audio sample frequency to 44100
-3. Set mp3 bit rate to 64k
+3. Set mp3 bit rate to 32k
 
 It creates output in the same directory with same name except the new extension.
 You must make sure directory does not already have a file with the same name.

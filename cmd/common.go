@@ -33,7 +33,7 @@ var (
 	mimeTypeWav = "audio/x-wav"
 	app         = "ffmpeg"
 	wavOption   = []string{"-ac", "1", "-ar", "44100"}
-	mp3Option   = []string{"-ac", "1", "-ar", "44100", "-b:a", "64k"}
+	mp3Option   = []string{"-ac", "1", "-ar", "44100", "-b:a", "32k"}
 )
 
 // getFileExtension returns file extension from file name
