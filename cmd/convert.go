@@ -97,7 +97,7 @@ func convertFile(input []string, output []string) {
 	a = append(a, output...)
 
 	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
-		fmt.Printf("Command is\n%s %s\n", app, a)
+		fmt.Printf("Command is\n%s %v\n", app, a)
 	}
 
 	cmd := exec.Command(app, a...)
