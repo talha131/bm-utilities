@@ -43,6 +43,7 @@ func getFileExtension(file string) string {
 
 // getFileNameWithoutExtension returns file name sans extension
 func getFileNameWithoutExtension(file string) string {
+	file = filepath.Base(file)
 	return strings.TrimSuffix(file, filepath.Ext(file))
 }
 
