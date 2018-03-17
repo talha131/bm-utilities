@@ -72,3 +72,7 @@ func isFileAudio(file string) bool {
 
 	return true
 }
+
+func createDirectory(path string) error {
+	return os.MkdirAll(path, os.ModePerm)
+}

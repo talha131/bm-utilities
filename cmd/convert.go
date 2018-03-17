@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -54,6 +55,11 @@ It will convert "example.wav" to "example.mp3"
 			return
 		}
 
+		oPath, _ := cmd.Flags().GetString("outputDirectory")
+		if oPath != "" {
+			createDirectory(oPath)
+		}
+
 		var (
 			input  []string
 			output []string
@@ -69,9 +75,10 @@ It will convert "example.wav" to "example.mp3"
 					output = append(output, mp3Option...)
 				}
 
+				fn := getFileNameWithoutExtension(e) + "." + format
+
 				output = append(output, "-map",
-					fmt.Sprintf("%d", len(input)/3),
-					getFileNameWithoutExtension(e)+"."+format)
+					fmt.Sprintf("%d", len(input)/3), filepath.Join(oPath, fn))
 			}
 		}
 
@@ -86,6 +93,7 @@ func init() {
 	audioCmd.AddCommand(convertCmd)
 
 	convertCmd.Flags().StringP("format", "f", "wav", "Output format. [mp3|wav]")
+	convertCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
 
 func convertFile(input []string, output []string) {
