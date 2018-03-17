@@ -40,13 +40,15 @@ Alongwith format conversion, it also
 2. Set audio sample frequency to 44100
 3. Set mp3 bit rate to 32k
 
-It creates output in the same directory with same name except the new extension.
-You must make sure directory does not already have a file with the same name.
+It creates output in the -o directory with same name except the new extension.
+If -o is not given then it creates output in the same directory.
+
+It removes album art from the audio. It only picks the audio stream.
 
 Usage:
-$ bmtool audio convert -f mp3 example.wav
+$ bmtool audio convert -f mp3 -o eg example.wav 
 
-It will convert "example.wav" to "example.mp3"
+It will convert "example.wav" to "example.mp3" in ./eg directory
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		format, _ := cmd.Flags().GetString("format")
@@ -78,7 +80,7 @@ It will convert "example.wav" to "example.mp3"
 				fn := getFileNameWithoutExtension(e) + "." + format
 
 				output = append(output, "-map",
-					fmt.Sprintf("%d", len(input)/3), filepath.Join(oPath, fn))
+					fmt.Sprintf("%d:a", len(input)/3), filepath.Join(oPath, fn))
 			}
 		}
 
