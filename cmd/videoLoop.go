@@ -87,7 +87,14 @@ func processVideoLoop(count uint16, oPath string, e string) {
 
 	defer os.Remove(tmpfile.Name()) // clean up
 
-	line := fmt.Sprintf("%s '%s/%s'\n", "file", filepath.Dir(e), e)
+	p, _ := filepath.Abs(e)
+
+	line := fmt.Sprintf("%s '%s'\n", "file", p)
+
+	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
+		fmt.Printf("file is\n%v\n", line)
+	}
+
 	lineR := strings.Repeat(line, int(count))
 
 	if _, err := tmpfile.WriteString(lineR); err != nil {
