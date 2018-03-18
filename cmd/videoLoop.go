@@ -21,9 +21,11 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -56,9 +58,14 @@ Output format is mp4.
 		for _, e := range args {
 			if isFileVideo(e) {
 				if duration == 0 && errC == nil && count > 0 {
-					processVideoLoop(count, oPath, e)
+					processVideoLoop(count, oPath, e,
+						getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count)))
 				} else if errD == nil && duration > 0 {
-					processVideoLoop(duration, oPath, e)
+					count, err := getRequiredLoop(e, duration)
+					if err == nil {
+						processVideoLoop(count, oPath, e,
+							getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "duration", duration)))
+					}
 				}
 			}
 		}
@@ -73,13 +80,36 @@ func init() {
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
 
+func getRequiredLoop(file string, reqD uint16) (uint16, error) {
+	if reqD == 0 {
+		fmt.Fprintf(os.Stderr, "Required duration is invalid")
+		return 0, errors.New("Required duration is 0")
+	}
+
+	fileDuration, err := getDuration(file)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to get duration of %s\t%s", file, err)
+		return 0, err
+	}
+
+	requiredDuration := reqD * 60
+
+	requiredLoop := math.Ceil(float64(requiredDuration) / float64(fileDuration))
+
+	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
+		fmt.Printf("Loop %s %f times\n", file, requiredLoop)
+	}
+
+	return uint16(requiredLoop), nil
+}
+
 func getOutputFileName(oPath string, f string, suffix string) string {
 	fn := getFileNameWithoutExtension(f) + "_" + suffix + "." + "mp4"
 
 	return filepath.Join(oPath, fn)
 }
 
-func processVideoLoop(count uint16, oPath string, e string) {
+func processVideoLoop(count uint16, oPath string, e string, output string) {
 	tmpfile, err := ioutil.TempFile(filepath.Dir(e), getFileNameWithoutExtension(e))
 	if err != nil {
 		log.Fatal(err)
@@ -106,7 +136,7 @@ func processVideoLoop(count uint16, oPath string, e string) {
 
 	createVideoLoop(count,
 		tmpfile.Name(),
-		getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count)))
+		output)
 }
 
 func createVideoLoop(count uint16, file string, output string) {
