@@ -22,6 +22,7 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -29,13 +30,13 @@ import (
 // videoLoopCmd represents the videoLoop command
 var videoLoopCmd = &cobra.Command{
 	Use:   "videoLoop",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Concatenate same video multiple times to create a loop",
+	Long: `Creates loop of a video by contactenating it multiple times.
+It picks only the video stream and discards audio stream.
+Output format is mp4.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+-c and -d are mutually exclusive.
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("videoLoop called")
 	},
@@ -44,13 +45,7 @@ to quickly create a Cobra application.`,
 func init() {
 	rootCmd.AddCommand(videoLoopCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// videoLoopCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// videoLoopCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	videoLoopCmd.Flags().CountP("count", "c", "Number of times to concatenate the video")
+	videoLoopCmd.Flags().DurationP("duration", "d", 30*time.Minute, "Minimum duration of the video")
+	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
