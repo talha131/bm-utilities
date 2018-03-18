@@ -31,11 +31,12 @@ import (
 )
 
 var (
-	mimeTypeMp3 = "audio/mpeg"
-	mimeTypeWav = "audio/x-wav"
-	app         = "ffmpeg"
-	wavOption   = []string{"-ac", "1", "-ar", "44100"}
-	mp3Option   = []string{"-ac", "1", "-ar", "44100", "-b:a", "32k"}
+	mimeTypeMp3   = "audio/mpeg"
+	mimeTypeWav   = "audio/x-wav"
+	mimeTypeVideo = "video/"
+	app           = "ffmpeg"
+	wavOption     = []string{"-ac", "1", "-ar", "44100"}
+	mp3Option     = []string{"-ac", "1", "-ar", "44100", "-b:a", "32k"}
 )
 
 // getFileExtension returns file extension from file name
@@ -47,6 +48,32 @@ func getFileExtension(file string) string {
 func getFileNameWithoutExtension(file string) string {
 	file = filepath.Base(file)
 	return strings.TrimSuffix(file, filepath.Ext(file))
+}
+
+func isFileVideo(file string) bool {
+	fi, err := os.Stat(file)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return false
+	}
+
+	if fi.IsDir() {
+		if v, _ := rootCmd.Flags().GetBool("verbose"); v {
+			fmt.Printf("%v \t direcotry\n", fi.Name())
+		}
+		return false
+	}
+
+	fileType := mime.TypeByExtension(getFileExtension(file))
+
+	if !strings.HasPrefix(fileType, mimeTypeVideo) {
+		if v, _ := rootCmd.Flags().GetBool("verbose"); v {
+			fmt.Printf("%v \t %v\n", fi.Name(), fileType)
+		}
+		return false
+	}
+
+	return true
 }
 
 // isFileAudio checks if file is mp3 or wav using mime type
