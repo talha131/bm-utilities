@@ -22,9 +22,12 @@ package cmd
 
 import (
 	"fmt"
+	"math"
 	"mime"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -113,4 +116,47 @@ func createOutputDirectory(cmd *cobra.Command) string {
 		createDirectory(o)
 	}
 	return o
+}
+
+func getDuration(file string) (int, error) {
+
+	out, err := exec.Command("sh", "-c", "ffmpeg -i "+file+
+		" 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,//").Output()
+	if err != nil {
+		return 0, err
+	}
+
+	outString := string(out[:])
+	split := strings.Split(outString, ":")
+
+	var seconds int
+
+	hour := strings.Replace(split[0], "\n", "", -1)
+	hourFloat, err := strconv.ParseFloat(hour, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	hourInt := int(math.Ceil(hourFloat))
+
+	minute := strings.Replace(split[1], "\n", "", -1)
+	minuteFloat, err := strconv.ParseFloat(minute, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	minuteInt := int(math.Ceil(minuteFloat))
+
+	second := strings.Replace(split[2], "\n", "", -1)
+	secondFloat, err := strconv.ParseFloat(second, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	secondInt := int(math.Ceil(secondFloat))
+
+	seconds = (hourInt * 3600) + (minuteInt * 60) + (secondInt)
+
+	return seconds, nil
+
 }
