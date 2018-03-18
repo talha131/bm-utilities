@@ -26,6 +26,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -76,4 +78,11 @@ func isFileAudio(file string) bool {
 
 func createDirectory(path string) error {
 	return os.MkdirAll(path, os.ModePerm)
+}
+
+func createOutputDirectory(cmd *cobra.Command) {
+	o, _ := cmd.Flags().GetString("outputDirectory")
+	if o != "" {
+		createDirectory(o)
+	}
 }
