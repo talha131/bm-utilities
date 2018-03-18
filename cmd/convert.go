@@ -57,10 +57,7 @@ It will convert "example.wav" to "example.mp3" in ./eg directory
 			return
 		}
 
-		oPath, _ := cmd.Flags().GetString("outputDirectory")
-		if oPath != "" {
-			createDirectory(oPath)
-		}
+		oPath := createOutputDirectory(cmd)
 
 		var (
 			input  []string
