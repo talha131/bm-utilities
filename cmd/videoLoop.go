@@ -22,6 +22,8 @@ package cmd
 
 import (
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -51,7 +53,6 @@ Output format is mp4.
 
 		oPath := createOutputDirectory(cmd)
 
-		fmt.Println(count, duration)
 		if duration == 0 && errC == nil && count > 0 {
 			processVideoLoop(count, oPath, args)
 		} else if errD == nil && duration > 0 {
@@ -69,19 +70,6 @@ func init() {
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
 
-func getFilterComplexParam(count uint16) string {
-
-	p := fmt.Sprintf("%sconcat=n=%d:v=1[outv]",
-		strings.Repeat("[0:v:0]", int(count)),
-		count)
-
-	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
-		fmt.Printf("filter_complex is\n%s\n", p)
-	}
-
-	return p
-}
-
 func getOutputFileName(oPath string, f string, suffix string) string {
 	fn := getFileNameWithoutExtension(f) + "_" + suffix + "." + "mp4"
 
@@ -92,25 +80,36 @@ func processVideoLoop(count uint16, oPath string, args []string) {
 	for _, e := range args {
 		fmt.Println(e)
 		if isFileVideo(e) {
+			tmpfile, err := ioutil.TempFile(filepath.Dir(e), getFileNameWithoutExtension(e))
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			defer os.Remove(tmpfile.Name()) // clean up
+
+			line := fmt.Sprintf("%s '%s/%s'\n", "file", filepath.Dir(e), e)
+			lineR := strings.Repeat(line, int(count))
+
+			if _, err := tmpfile.WriteString(lineR); err != nil {
+				log.Fatal(err)
+			}
+			if err := tmpfile.Close(); err != nil {
+				log.Fatal(err)
+			}
+
 			createVideoLoop(count,
-				e,
+				tmpfile.Name(),
 				getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count)))
 		}
 	}
 }
 
 func createVideoLoop(count uint16, file string, output string) {
-	filter := getFilterComplexParam(count)
-	var input []string
-	input = append(input, "-i", file, filter, output)
 
-	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
-		fmt.Printf("Command is\n%s\n", input)
-	}
-
-	cmd := exec.Command(app, "-i", file,
-		"-filter_complex", getFilterComplexParam(count),
-		"-map", "[outv]",
+	cmd := exec.Command(app,
+		"-f", "concat",
+		"-safe", "0",
+		"-i", file,
 		"-qscale", "0",
 		output)
 
