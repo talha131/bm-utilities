@@ -80,9 +80,10 @@ func createDirectory(path string) error {
 	return os.MkdirAll(path, os.ModePerm)
 }
 
-func createOutputDirectory(cmd *cobra.Command) {
+func createOutputDirectory(cmd *cobra.Command) string {
 	o, _ := cmd.Flags().GetString("outputDirectory")
 	if o != "" {
 		createDirectory(o)
 	}
+	return o
 }
