@@ -53,12 +53,15 @@ Output format is mp4.
 
 		oPath := createOutputDirectory(cmd)
 
-		if duration == 0 && errC == nil && count > 0 {
-			processVideoLoop(count, oPath, args)
-		} else if errD == nil && duration > 0 {
-			processVideoLoop(duration, oPath, args)
+		for _, e := range args {
+			if isFileVideo(e) {
+				if duration == 0 && errC == nil && count > 0 {
+					processVideoLoop(count, oPath, e)
+				} else if errD == nil && duration > 0 {
+					processVideoLoop(duration, oPath, e)
+				}
+			}
 		}
-
 	},
 }
 
@@ -76,32 +79,27 @@ func getOutputFileName(oPath string, f string, suffix string) string {
 	return filepath.Join(oPath, fn)
 }
 
-func processVideoLoop(count uint16, oPath string, args []string) {
-	for _, e := range args {
-		fmt.Println(e)
-		if isFileVideo(e) {
-			tmpfile, err := ioutil.TempFile(filepath.Dir(e), getFileNameWithoutExtension(e))
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			defer os.Remove(tmpfile.Name()) // clean up
-
-			line := fmt.Sprintf("%s '%s/%s'\n", "file", filepath.Dir(e), e)
-			lineR := strings.Repeat(line, int(count))
-
-			if _, err := tmpfile.WriteString(lineR); err != nil {
-				log.Fatal(err)
-			}
-			if err := tmpfile.Close(); err != nil {
-				log.Fatal(err)
-			}
-
-			createVideoLoop(count,
-				tmpfile.Name(),
-				getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count)))
-		}
+func processVideoLoop(count uint16, oPath string, e string) {
+	tmpfile, err := ioutil.TempFile(filepath.Dir(e), getFileNameWithoutExtension(e))
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	defer os.Remove(tmpfile.Name()) // clean up
+
+	line := fmt.Sprintf("%s '%s/%s'\n", "file", filepath.Dir(e), e)
+	lineR := strings.Repeat(line, int(count))
+
+	if _, err := tmpfile.WriteString(lineR); err != nil {
+		log.Fatal(err)
+	}
+	if err := tmpfile.Close(); err != nil {
+		log.Fatal(err)
+	}
+
+	createVideoLoop(count,
+		tmpfile.Name(),
+		getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count)))
 }
 
 func createVideoLoop(count uint16, file string, output string) {
