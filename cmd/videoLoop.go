@@ -111,6 +111,7 @@ func createVideoLoop(count uint16, file string, output string) {
 	cmd := exec.Command(app, "-i", file,
 		"-filter_complex", getFilterComplexParam(count),
 		"-map", "[outv]",
+		"-qscale", "0",
 		output)
 
 	cmd.Stderr = os.Stderr
