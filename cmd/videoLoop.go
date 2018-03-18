@@ -45,7 +45,7 @@ Output format is mp4.
 func init() {
 	rootCmd.AddCommand(videoLoopCmd)
 
-	videoLoopCmd.Flags().CountP("count", "c", "Number of times to concatenate the video")
-	videoLoopCmd.Flags().DurationP("duration", "d", 30*time.Minute, "Minimum duration of the video")
+	videoLoopCmd.Flags().Uint16P("count", "c", 3, "Number of times to concatenate the video")
+	videoLoopCmd.Flags().Uint16P("duration", "d", 0, "Minimum minutes of the video")
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
