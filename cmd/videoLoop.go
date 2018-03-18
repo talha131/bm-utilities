@@ -39,7 +39,6 @@ var videoLoopCmd = &cobra.Command{
 	Use:   "videoLoop",
 	Short: "Concatenate same video multiple times to create a loop",
 	Long: `Creates loop of a video by contactenating it multiple times.
-It picks only the video stream and discards audio stream.
 Output format is mp4.
 
 -c and -d are mutually exclusive. -c has precendence over -d.
