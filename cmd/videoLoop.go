@@ -71,8 +71,7 @@ func init() {
 
 func getFilterComplexParam(count uint16) string {
 
-	p := fmt.Sprintf("%s \"%sconcat=n=%d:v=1[outv]\" -map \"[outv]\"",
-		"-filter_complex",
+	p := fmt.Sprintf("%sconcat=n=%d:v=1[outv]",
 		strings.Repeat("[0:v:0]", int(count)),
 		count)
 
@@ -109,7 +108,10 @@ func createVideoLoop(count uint16, file string, output string) {
 		fmt.Printf("Command is\n%s\n", input)
 	}
 
-	cmd := exec.Command(app, input...)
+	cmd := exec.Command(app, "-i", file,
+		"-filter_complex", getFilterComplexParam(count),
+		"-map", "[outv]",
+		output)
 
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
