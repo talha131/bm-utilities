@@ -76,6 +76,8 @@ func init() {
 
 	videoLoopCmd.Flags().Uint16P("count", "c", 3, "Number of times to concatenate the video")
 	videoLoopCmd.Flags().Uint16P("duration", "d", 0, "Minimum minutes of the video")
+	videoLoopCmd.Flags().BoolP("withCrossFade", "cf", false, "Concatenate videos with cross fade transition")
+	videoLoopCmd.Flags().Uint16P("transitionDuration", "td", 2, "Transition duration. Default is 2 seconds.")
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
 
