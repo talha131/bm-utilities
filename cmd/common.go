@@ -137,7 +137,7 @@ func getDuration(file string) (int, error) {
 		return 0, err
 	}
 
-	hourInt := int(math.Ceil(hourFloat))
+	hourInt := int(math.Floor(hourFloat))
 
 	minute := strings.Replace(split[1], "\n", "", -1)
 	minuteFloat, err := strconv.ParseFloat(minute, 64)
@@ -145,7 +145,7 @@ func getDuration(file string) (int, error) {
 		return 0, err
 	}
 
-	minuteInt := int(math.Ceil(minuteFloat))
+	minuteInt := int(math.Floor(minuteFloat))
 
 	second := strings.Replace(split[2], "\n", "", -1)
 	secondFloat, err := strconv.ParseFloat(second, 64)
@@ -153,7 +153,7 @@ func getDuration(file string) (int, error) {
 		return 0, err
 	}
 
-	secondInt := int(math.Ceil(secondFloat))
+	secondInt := int(math.Floor(secondFloat))
 
 	seconds = (hourInt * 3600) + (minuteInt * 60) + (secondInt)
 
