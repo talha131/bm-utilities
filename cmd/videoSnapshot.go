@@ -32,8 +32,11 @@ import (
 // videoSnapshotCmd represents the videoSnapshot command
 var videoSnapshotCmd = &cobra.Command{
 	Use:   "videoSnapshot",
-	Short: "Takes snapshot of video from the mid",
-	Long: `Takes snaptshot of video from the middle.
+	Short: "Takes snapshot of video at 2nd second",
+	Long: `Takes snapshot of video.
+Default is to take snapshot at 2nd second i.e. 00::00::2.0
+
+if -m flag is used then snapshot is taken from the middle of the video.
 If video is 30 minute long, then it will take snaptshot right at 00:15:00.
 
 Default output format is png. If output format is set to jpeg then it is exported
@@ -49,13 +52,22 @@ at highest quality.
 		oPath := createOutputDirectory(cmd)
 		for _, e := range args {
 			if isFileVideo(e) {
-				mid, err := getMidTimestamp(e)
-				if err != nil {
+				timestamp := "00:00:02.0"
+				if d, e := getDuration(e); e != nil || d < 2 {
 					continue
 				}
 
+				if m, _ := cmd.Flags().GetBool("mid"); m {
+
+					var err error
+					timestamp, err = getMidTimestamp(e)
+					if err != nil {
+						continue
+					}
+				}
+
 				of := filepath.Join(oPath, getFileNameWithoutExtension(e)+"."+format)
-				createVideoSnapshot(mid, e, of)
+				createVideoSnapshot(timestamp, e, of)
 			}
 		}
 	},
@@ -63,6 +75,7 @@ at highest quality.
 
 func init() {
 	rootCmd.AddCommand(videoSnapshotCmd)
+	videoSnapshotCmd.Flags().BoolP("mid", "m", false, "Take snapshot from mid")
 	videoSnapshotCmd.Flags().StringP("format", "f", "png", "Output format. png|jpg")
 	videoSnapshotCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
