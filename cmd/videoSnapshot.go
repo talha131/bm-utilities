@@ -22,6 +22,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -29,28 +32,69 @@ import (
 // videoSnapshotCmd represents the videoSnapshot command
 var videoSnapshotCmd = &cobra.Command{
 	Use:   "videoSnapshot",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Takes snapshot of video from the mid",
+	Long: `Takes snaptshot of video from the middle.
+If video is 30 minute long, then it will take snaptshot right at 00:15:00.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Default output format is png. If output format is set to jpeg then it is exported
+at highest quality.
+`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("videoSnapshot called")
+		format, _ := cmd.Flags().GetString("format")
+		if format != "png" && format != "jpg" {
+			fmt.Fprintf(os.Stderr, "Unknown format %v. Valid values are [png|jpg]\n", format)
+			return
+		}
+
+		oPath := createOutputDirectory(cmd)
+		for _, e := range args {
+			if isFileVideo(e) {
+				mid, err := getMidTimestamp(e)
+				if err != nil {
+					continue
+				}
+
+				of := filepath.Join(oPath, getFileNameWithoutExtension(e)+"."+format)
+				createVideoSnapshot(mid, e, of)
+			}
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(videoSnapshotCmd)
+	videoSnapshotCmd.Flags().StringP("format", "f", "png", "Output format. png|jpg")
+	videoSnapshotCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
+}
 
-	// Here you will define your flags and configuration settings.
+func getMidTimestamp(file string) (string, error) {
+	fileDuration, err := getDuration(file)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to get duration of %s\t%s", file, err)
+		return "00:00:00", err
+	}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// videoSnapshotCmd.PersistentFlags().String("foo", "", "A help for foo")
+	mid := fmt.Sprintf("%d", fileDuration/2)
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// videoSnapshotCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
+		fmt.Printf("Total %d, mid %s", fileDuration, mid)
+	}
+
+	return mid, nil
+}
+
+func createVideoSnapshot(timestamp string, file string, output string) {
+	cmd := exec.Command(app,
+		"-ss", timestamp,
+		"-i", file,
+		"-vframes", "1",
+		"-qscale:v", "1", // meaningless if output format is png
+		output)
+
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err := cmd.Run()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 }
