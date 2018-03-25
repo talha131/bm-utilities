@@ -46,6 +46,8 @@ Output format is mp4.
 	Run: func(cmd *cobra.Command, args []string) {
 		count, errC := cmd.Flags().GetUint16("count")
 		duration, errD := cmd.Flags().GetUint16("duration")
+		crossFade, _ := cmd.Flags().GetBool("withCrossFade")
+		transitionDuration, _ := cmd.Flags().GetUint16("transitionDuration")
 
 		if errC != nil && errD != nil {
 			fmt.Fprintf(os.Stderr, "Unable to find Count or Duration. At least one is required")
@@ -57,13 +59,19 @@ Output format is mp4.
 		for _, e := range args {
 			if isFileVideo(e) {
 				if duration == 0 && errC == nil && count > 0 {
-					createVideoLoopWithoutTransition(count, oPath, e,
-						getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count)))
+					outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count))
+					if !crossFade {
+						createVideoLoopWithoutTransition(count, oPath, e, outputFileName)
+					} else {
+						createVideoLoopWithTransition(count, transitionDuration, oPath, e, outputFileName)
+					}
 				} else if errD == nil && duration > 0 {
 					count, err := getRequiredLoop(e, duration)
 					if err == nil {
-						createVideoLoopWithoutTransition(count, oPath, e,
-							getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "duration", duration)))
+						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "duration", duration))
+						if !crossFade {
+							createVideoLoopWithoutTransition(count, oPath, e, outputFileName)
+						}
 					}
 				}
 			}
@@ -76,9 +84,58 @@ func init() {
 
 	videoLoopCmd.Flags().Uint16P("count", "c", 3, "Number of times to concatenate the video")
 	videoLoopCmd.Flags().Uint16P("duration", "d", 0, "Minimum minutes of the video")
-	videoLoopCmd.Flags().BoolP("withCrossFade", "cf", false, "Concatenate videos with cross fade transition")
-	videoLoopCmd.Flags().Uint16P("transitionDuration", "td", 2, "Transition duration. Default is 2 seconds.")
+	videoLoopCmd.Flags().BoolP("withCrossFade", "x", false, "Concatenate videos with cross fade transition")
+	videoLoopCmd.Flags().Uint16P("transitionDuration", "t", 2, "Transition duration. Default is 2 seconds.")
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
+}
+
+func createVideoLoopWithTransition(count uint16, transitionDuration uint16, outputPath string, file string, outputFileName string) {
+	d, err := getDuration(file)
+	if err != nil {
+		return
+	}
+
+	dur := uint16(d)
+
+	var a []string
+	a = append(a, "-hide_banner")
+	a = append(a, "-i", file)
+	a = append(a, "-an")
+	a = append(a, "-filter_complex")
+
+	//a = append(a, "\"")
+
+	a = append(a, fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[firstclip]; ", dur-transitionDuration))
+	a = append(a, fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[secondclip]; ", transitionDuration, dur))
+	a = append(a, fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", dur-transitionDuration, dur))
+	a = append(a, fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", transitionDuration))
+
+	a = append(a, "[fadeinsrc]format=pix_fmts=yuva420p, fade=t=in:st=0:d=5:alpha=1[fadein]; ")
+	a = append(a, "[fadeoutsrc]format=pix_fmts=yuva420p, fade=t=out:st=0:d=5:alpha=1[fadeout]; ")
+
+	a = append(a, "[fadein]fifo[fadeinfifo]; ")
+	a = append(a, "[fadeout]fifo[fadeoutfifo]; ")
+	a = append(a, "[fadeoutfifo][fadeinfifo]overlay[crossfade]; ")
+
+	a = append(a, "[firstclip][crossfade][secondclip]concat=n=3:v=1[output]")
+
+	//a = append(a, "\"")
+
+	a = append(a, "-map", "[output]")
+	a = append(a, outputFileName)
+
+	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
+		fmt.Printf("filter_complex is\n%s\n", a)
+	}
+
+	cmd := exec.Command(app, a...)
+
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+	err = cmd.Run()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 }
 
 func getRequiredLoop(file string, reqD uint16) (uint16, error) {
