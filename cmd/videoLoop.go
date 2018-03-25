@@ -57,12 +57,12 @@ Output format is mp4.
 		for _, e := range args {
 			if isFileVideo(e) {
 				if duration == 0 && errC == nil && count > 0 {
-					processVideoLoop(count, oPath, e,
+					createVideoLoopWithoutTransition(count, oPath, e,
 						getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count)))
 				} else if errD == nil && duration > 0 {
 					count, err := getRequiredLoop(e, duration)
 					if err == nil {
-						processVideoLoop(count, oPath, e,
+						createVideoLoopWithoutTransition(count, oPath, e,
 							getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "duration", duration)))
 					}
 				}
@@ -108,7 +108,7 @@ func getOutputFileName(oPath string, f string, suffix string) string {
 	return filepath.Join(oPath, fn)
 }
 
-func processVideoLoop(count uint16, oPath string, e string, output string) {
+func createVideoLoopWithoutTransition(count uint16, oPath string, e string, output string) {
 	tmpfile, err := ioutil.TempFile(filepath.Dir(e), getFileNameWithoutExtension(e))
 	if err != nil {
 		log.Fatal(err)
@@ -133,12 +133,12 @@ func processVideoLoop(count uint16, oPath string, e string, output string) {
 		log.Fatal(err)
 	}
 
-	createVideoLoop(count,
+	runCommandVideoLoopWithoutTransition(count,
 		tmpfile.Name(),
 		output)
 }
 
-func createVideoLoop(count uint16, file string, output string) {
+func runCommandVideoLoopWithoutTransition(count uint16, file string, output string) {
 
 	cmd := exec.Command(app, "-hide_banner",
 		"-f", "concat",
