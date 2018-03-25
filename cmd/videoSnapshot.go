@@ -52,7 +52,7 @@ at highest quality.
 		oPath := createOutputDirectory(cmd)
 		for _, e := range args {
 			if isFileVideo(e) {
-				timestamp := "00:00:02.0"
+				timestamp := "2"
 				if d, e := getDuration(e); e != nil || d < 2 {
 					continue
 				}
@@ -66,7 +66,8 @@ at highest quality.
 					}
 				}
 
-				of := filepath.Join(oPath, getFileNameWithoutExtension(e)+"."+format)
+				f := fmt.Sprintf("%s-%s.%s", getFileNameWithoutExtension(e), timestamp, format)
+				of := filepath.Join(oPath, f)
 				createVideoSnapshot(timestamp, e, of)
 			}
 		}
@@ -84,7 +85,7 @@ func getMidTimestamp(file string) (string, error) {
 	fileDuration, err := getDuration(file)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to get duration of %s\t%s", file, err)
-		return "00:00:00", err
+		return "00", err
 	}
 
 	mid := fmt.Sprintf("%d", fileDuration/2)
