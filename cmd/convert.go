@@ -99,6 +99,7 @@ func convertFile(input []string, output []string) {
 
 	var a []string
 
+	a = append(a, "-hide_banner")
 	a = append(a, input...)
 
 	a = append(a, output...)

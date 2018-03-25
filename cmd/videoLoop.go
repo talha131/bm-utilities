@@ -140,7 +140,7 @@ func processVideoLoop(count uint16, oPath string, e string, output string) {
 
 func createVideoLoop(count uint16, file string, output string) {
 
-	cmd := exec.Command(app,
+	cmd := exec.Command(app, "-hide_banner",
 		"-f", "concat",
 		"-safe", "0",
 		"-i", file,

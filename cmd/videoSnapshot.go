@@ -98,7 +98,7 @@ func getMidTimestamp(file string) (string, error) {
 }
 
 func createVideoSnapshot(timestamp string, file string, output string) {
-	cmd := exec.Command(app,
+	cmd := exec.Command(app, "-hide_banner",
 		"-ss", timestamp,
 		"-i", file,
 		"-vframes", "1",
