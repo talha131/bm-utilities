@@ -97,38 +97,32 @@ func createVideoLoopWithTransition(count uint16, transitionDuration uint16, outp
 
 	dur := uint16(d)
 
-	var a []string
-	a = append(a, "-hide_banner")
-	a = append(a, "-i", file)
-	a = append(a, "-an")
-	a = append(a, "-filter_complex")
+	var a string
 
-	//a = append(a, "\"")
+	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[firstclip]; ", dur-transitionDuration)
+	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[secondclip]; ", transitionDuration, dur)
+	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", dur-transitionDuration, dur)
+	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", transitionDuration)
 
-	a = append(a, fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[firstclip]; ", dur-transitionDuration))
-	a = append(a, fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[secondclip]; ", transitionDuration, dur))
-	a = append(a, fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", dur-transitionDuration, dur))
-	a = append(a, fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", transitionDuration))
+	a = a + "[fadeinsrc]format=pix_fmts=yuva420p, fade=t=in:st=0:d=5:alpha=1[fadein]; "
+	a = a + "[fadeoutsrc]format=pix_fmts=yuva420p, fade=t=out:st=0:d=5:alpha=1[fadeout]; "
 
-	a = append(a, "[fadeinsrc]format=pix_fmts=yuva420p, fade=t=in:st=0:d=5:alpha=1[fadein]; ")
-	a = append(a, "[fadeoutsrc]format=pix_fmts=yuva420p, fade=t=out:st=0:d=5:alpha=1[fadeout]; ")
+	a = a + "[fadein]fifo[fadeinfifo]; "
+	a = a + "[fadeout]fifo[fadeoutfifo]; "
+	a = a + "[fadeoutfifo][fadeinfifo]overlay[crossfade]; "
 
-	a = append(a, "[fadein]fifo[fadeinfifo]; ")
-	a = append(a, "[fadeout]fifo[fadeoutfifo]; ")
-	a = append(a, "[fadeoutfifo][fadeinfifo]overlay[crossfade]; ")
-
-	a = append(a, "[firstclip][crossfade][secondclip]concat=n=3:v=1[output]")
-
-	//a = append(a, "\"")
-
-	a = append(a, "-map", "[output]")
-	a = append(a, outputFileName)
+	a = a + "[firstclip][crossfade][secondclip]concat=n=3:v=1[output]"
 
 	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
 		fmt.Printf("filter_complex is\n%s\n", a)
 	}
 
-	cmd := exec.Command(app, a...)
+	cmd := exec.Command(app, "-hide_banner",
+		"-i", file,
+		"-an", "-filter_complex",
+		a,
+		"-map", "[output]",
+		outputFileName)
 
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
