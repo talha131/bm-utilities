@@ -102,6 +102,16 @@ func createVideoLoopWithTransition(count uint16, transitionDuration uint16, outp
 
 	dur := uint16(d)
 
+	cf := ""
+	cl := ""
+	cfcl := ""
+	var i uint16 = 1
+	for ; i < count; i++ {
+		cf = cf + fmt.Sprintf("[cf%d]", i)
+		cl = cl + fmt.Sprintf("[cl%d]", i)
+		cfcl = cfcl + fmt.Sprintf("[cf%d][cl%d]", i, i)
+	}
+
 	var a string
 
 	// dur = 15, transitionDuration = 5
@@ -118,7 +128,11 @@ func createVideoLoopWithTransition(count uint16, transitionDuration uint16, outp
 	a = a + "[fadeout]fifo[fadeoutfifo]; "
 	a = a + "[fadeoutfifo][fadeinfifo]overlay[crossfade]; "
 
-	a = a + "[clip1][crossfade][clip2][clip3]concat=n=4:v=1[output]"
+	a = a + "[crossfade] split " + cf + "; "
+	a = a + "[clip2] split " + cl + "; "
+
+	a = a + "[clip1]" + cfcl + "[clip3]"
+	a = a + fmt.Sprintf("concat=n=%d:v=1[output]", count*2)
 
 	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
 		fmt.Printf("filter_complex is\n%s\n", a)
