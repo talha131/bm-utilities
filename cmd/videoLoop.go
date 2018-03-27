@@ -104,8 +104,8 @@ func createVideoLoopWithTransition(count uint16, transitionDuration uint16, outp
 	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", dur-transitionDuration, dur)
 	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", transitionDuration)
 
-	a = a + "[fadeinsrc]format=pix_fmts=yuva420p, fade=t=in:st=0:d=5:alpha=1[fadein]; "
-	a = a + "[fadeoutsrc]format=pix_fmts=yuva420p, fade=t=out:st=0:d=5:alpha=1[fadeout]; "
+	a = a + fmt.Sprintf("[fadeinsrc]format=pix_fmts=yuva420p, fade=t=in:st=0:d=%d:alpha=1[fadein]; ", transitionDuration)
+	a = a + fmt.Sprintf("[fadeoutsrc]format=pix_fmts=yuva420p, fade=t=out:st=0:d=%d:alpha=1[fadeout]; ", transitionDuration)
 
 	a = a + "[fadein]fifo[fadeinfifo]; "
 	a = a + "[fadeout]fifo[fadeoutfifo]; "
