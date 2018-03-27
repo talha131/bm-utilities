@@ -199,7 +199,7 @@ func runCommandVideoLoopWithoutTransition(count uint16, file string, output stri
 		"-f", "concat",
 		"-safe", "0",
 		"-i", file,
-		"-qscale", "0",
+		"-qscale:v", "0",
 		output)
 
 	cmd.Stderr = os.Stderr
