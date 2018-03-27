@@ -54,6 +54,11 @@ Output format is mp4.
 			return
 		}
 
+		if count < 2 {
+			fmt.Fprint(os.Stderr, "Loop count must be at least 2.")
+			return
+		}
+
 		oPath := createOutputDirectory(cmd)
 
 		for _, e := range args {
@@ -82,7 +87,7 @@ Output format is mp4.
 func init() {
 	rootCmd.AddCommand(videoLoopCmd)
 
-	videoLoopCmd.Flags().Uint16P("count", "c", 3, "Number of times to concatenate the video")
+	videoLoopCmd.Flags().Uint16P("count", "c", 3, "Number of times to concatenate the video. Minimum 2.")
 	videoLoopCmd.Flags().Uint16P("duration", "d", 0, "Minimum minutes of the video")
 	videoLoopCmd.Flags().BoolP("withCrossFade", "x", false, "Concatenate videos with cross fade transition")
 	videoLoopCmd.Flags().Uint16P("transitionDuration", "t", 2, "Transition duration. Default is 2 seconds.")
