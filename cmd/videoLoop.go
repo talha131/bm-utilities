@@ -50,7 +50,7 @@ Output format is mp4.
 		transitionDuration, _ := cmd.Flags().GetUint16("transitionDuration")
 
 		if errC != nil && errD != nil {
-			fmt.Fprintf(os.Stderr, "Unable to find Count or Duration. At least one is required")
+			fmt.Fprint(os.Stderr, "Unable to find Count or Duration. At least one is required")
 			return
 		}
 
