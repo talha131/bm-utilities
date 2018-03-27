@@ -99,8 +99,8 @@ func createVideoLoopWithTransition(count uint16, transitionDuration uint16, outp
 
 	var a string
 
-	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[firstclip]; ", dur-transitionDuration)
-	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[secondclip]; ", transitionDuration, dur)
+	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[clip1]; ", dur-transitionDuration)
+	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip2]; ", transitionDuration, dur)
 	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", dur-transitionDuration, dur)
 	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", transitionDuration)
 
@@ -111,7 +111,7 @@ func createVideoLoopWithTransition(count uint16, transitionDuration uint16, outp
 	a = a + "[fadeout]fifo[fadeoutfifo]; "
 	a = a + "[fadeoutfifo][fadeinfifo]overlay[crossfade]; "
 
-	a = a + "[firstclip][crossfade][secondclip]concat=n=3:v=1[output]"
+	a = a + "[clip1][crossfade][clip2]concat=n=3:v=1[output]"
 
 	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
 		fmt.Printf("filter_complex is\n%s\n", a)
