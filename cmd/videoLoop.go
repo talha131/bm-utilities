@@ -99,10 +99,12 @@ func createVideoLoopWithTransition(count uint16, transitionDuration uint16, outp
 
 	var a string
 
-	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[clip1]; ", dur-transitionDuration)
-	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip2]; ", transitionDuration, dur)
-	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", dur-transitionDuration, dur)
-	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", transitionDuration)
+	// dur = 15, transitionDuration = 5
+	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[clip1]; ", dur-transitionDuration)                      // 0 - 10
+	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip2]; ", transitionDuration, dur-transitionDuration) // 5 - 10
+	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip3]; ", dur-transitionDuration, dur)                // 10 - 15
+	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", dur-transitionDuration, dur)           // 10 - 15
+	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", transitionDuration)                      // 0 - 5
 
 	a = a + fmt.Sprintf("[fadeinsrc]format=pix_fmts=yuva420p, fade=t=in:st=0:d=%d:alpha=1[fadein]; ", transitionDuration)
 	a = a + fmt.Sprintf("[fadeoutsrc]format=pix_fmts=yuva420p, fade=t=out:st=0:d=%d:alpha=1[fadeout]; ", transitionDuration)
@@ -111,7 +113,7 @@ func createVideoLoopWithTransition(count uint16, transitionDuration uint16, outp
 	a = a + "[fadeout]fifo[fadeoutfifo]; "
 	a = a + "[fadeoutfifo][fadeinfifo]overlay[crossfade]; "
 
-	a = a + "[clip1][crossfade][clip2]concat=n=3:v=1[output]"
+	a = a + "[clip1][crossfade][clip2][clip3]concat=n=4:v=1[output]"
 
 	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
 		fmt.Printf("filter_complex is\n%s\n", a)
