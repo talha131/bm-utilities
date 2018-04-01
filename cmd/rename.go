@@ -89,7 +89,7 @@ func getFileInfo(file string) (os.FileInfo, error) {
 		if v, _ := rootCmd.Flags().GetBool("verbose"); v {
 			fmt.Printf("Skipping %v\n", fi.Name())
 		}
-		return fi, errors.New("Is not a file")
+		return fi, errors.New("is not a file")
 	}
 	return fi, nil
 }

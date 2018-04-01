@@ -94,7 +94,7 @@ func init() {
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
 
-func filterComplexWithCrossFade(count uint16, tDur uint16, dur uint16) string {
+func filterComplexWithCrossFade(count uint16, tDur uint16, length uint16) string {
 
 	cf := ""
 	cl := ""
@@ -108,12 +108,12 @@ func filterComplexWithCrossFade(count uint16, tDur uint16, dur uint16) string {
 
 	var a string
 
-	// dur = 15, tDur = 5
-	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[clip1]; ", dur-tDur)            // 0 - 10
-	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip2]; ", tDur, dur-tDur)     // 5 - 10
-	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip3]; ", dur-tDur, dur)      // 10 - 15
-	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", dur-tDur, dur) // 10 - 15
-	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", tDur)            // 0 - 5
+	// length = 15, tDur = 5
+	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[clip1]; ", length-tDur)               // 0 - 10
+	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip2]; ", tDur, length-tDur)        // 5 - 10
+	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip3]; ", length-tDur, length)      // 10 - 15
+	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", length-tDur, length) // 10 - 15
+	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", tDur)                  // 0 - 5
 
 	a = a + fmt.Sprintf("[fadeinsrc]format=pix_fmts=yuva420p, fade=t=in:st=0:d=%d:alpha=1[fadein]; ", tDur)
 	a = a + fmt.Sprintf("[fadeoutsrc]format=pix_fmts=yuva420p, fade=t=out:st=0:d=%d:alpha=1[fadeout]; ", tDur)
@@ -167,7 +167,7 @@ func createVideoLoopWithTransition(count uint16, tDur uint16, outputPath string,
 func getRequiredLoop(file string, reqL uint16) (uint16, error) {
 	if reqL == 0 {
 		fmt.Fprintf(os.Stderr, "Required duration is invalid")
-		return 0, errors.New("Required duration is 0")
+		return 0, errors.New("required duration is 0")
 	}
 
 	fileDuration, err := getLength(file)
