@@ -70,7 +70,7 @@ Output format is mp4.
 		for _, e := range args {
 			if isFileVideo(e) {
 				if shouldConcatCountTimes {
-					outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count))
+					outputFileName := getOutputFileName(oPath, e, "loop", count)
 					createVideoLoopWithTransition(count, tDuration, e, outputFileName)
 				} else if shouldConcatToAchieveLength {
 					length, err := getLength(e)
@@ -81,7 +81,7 @@ Output format is mp4.
 					count, err := getRequiredLoopCount(length, requiredLength, tDuration)
 
 					if err == nil {
-						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "requiredLength", length))
+						outputFileName := getOutputFileName(oPath, e, "length", length)
 						createVideoLoopWithTransition(count, tDuration, e, outputFileName)
 					}
 				}
@@ -192,9 +192,10 @@ func getRequiredLoopCount(length int, requiredLength int, tDuration int) (int, e
 	return requiredLoop, nil
 }
 
-func getOutputFileName(oPath string, f string, suffix string) string {
-	fn := getFileNameWithoutExtension(f) + "_" + suffix + "." + "mp4"
-
+func getOutputFileName(oPath string, f string, t string, num int) string {
+	fn := fmt.Sprintf("%s_%s-%d.mp4", getFileNameWithoutExtension(f),
+		t,
+		num)
 	return filepath.Join(oPath, fn)
 }
 
