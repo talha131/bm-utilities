@@ -73,7 +73,7 @@ Output format is mp4.
 						createVideoLoopWithTransition(count, tDuration, e, outputFileName)
 					}
 				} else if shouldConcatToAchieveLength {
-					count, err := getRequiredLoop(e, length)
+					count, err := getRequiredLoopCount(e, length)
 					if err == nil {
 						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "length", length))
 						if !crossFade {
@@ -167,7 +167,7 @@ func createVideoLoopWithTransition(count uint16, tDur uint16, file string, outpu
 	}
 }
 
-func getRequiredLoop(file string, reqL uint16) (uint16, error) {
+func getRequiredLoopCount(file string, reqL uint16) (uint16, error) {
 	if reqL == 0 {
 		fmt.Fprintf(os.Stderr, "Required duration is invalid")
 		return 0, errors.New("required duration is 0")
