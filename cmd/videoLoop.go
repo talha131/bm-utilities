@@ -126,6 +126,7 @@ func filterComplexWithCrossFade(count uint16, tDur uint16, length uint16) string
 	a = a + fmt.Sprintf("[clip2] split=%d %s ; ", count-1, cl)
 
 	a = a + "[clip1]" + cfcl + "[clip3]"
+	// Final number of clips to concatenate is twice of count
 	a = a + fmt.Sprintf("concat=n=%d:v=1[output]", count*2)
 
 	return a
