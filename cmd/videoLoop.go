@@ -73,9 +73,14 @@ Output format is mp4.
 						createVideoLoopWithTransition(count, tDuration, e, outputFileName)
 					}
 				} else if shouldConcatToAchieveLength {
-					count, err := getRequiredLoopCount(e, length)
+					length, err := getLength(e)
+					if err != nil {
+						return
+					}
+
+					count, err := getRequiredLoopCount(length, requiredLength, tDuration)
 					if err == nil {
-						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "length", length))
+						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "requiredLength", length))
 						if !crossFade {
 							createVideoLoopWithoutTransition(count, e, outputFileName)
 						}
