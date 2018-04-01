@@ -167,27 +167,28 @@ func createVideoLoopWithTransition(count uint16, tDur uint16, file string, outpu
 	}
 }
 
-func getRequiredLoopCount(file string, reqL uint16) (uint16, error) {
-	if reqL == 0 {
-		fmt.Fprintf(os.Stderr, "Required duration is invalid")
+func getRequiredLoopCount(length int, requiredLength int, tDuration int) (int, error) {
+	if requiredLength == 0 {
+		fmt.Fprintf(os.Stderr, "Required length is invalid")
 		return 0, errors.New("required duration is 0")
 	}
 
-	length, err := getLength(file)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to get duration of %s\t%s", file, err)
-		return 0, err
-	}
-
-	requiredLength := reqL * 60
-
-	requiredLoop := math.Ceil(float64(requiredLength) / float64(length))
+	// totalLength = count x firstClip + lastClip
+	// count = (totalLength - lastClip) / firstClip
+	//
+	// Here totalLength is the requiredLength.
+	// lastClip is transitionDuration
+	// firstClip is fileLength - transitionDuration
+	// count = (requiredLength - tDuration) / (length - tDuration)
+	numerator := float64(requiredLength - tDuration)
+	denominator := float64(length - tDuration)
+	requiredLoop := int(math.Ceil(numerator / denominator))
 
 	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
-		fmt.Printf("Loop %s %f times\n", file, requiredLoop)
+		fmt.Printf("Loop %d times\n", requiredLoop)
 	}
 
-	return uint16(requiredLoop), nil
+	return requiredLoop, nil
 }
 
 func getOutputFileName(oPath string, f string, suffix string) string {
