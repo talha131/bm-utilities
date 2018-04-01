@@ -173,15 +173,15 @@ func getRequiredLoopCount(file string, reqL uint16) (uint16, error) {
 		return 0, errors.New("required duration is 0")
 	}
 
-	fileDuration, err := getLength(file)
+	length, err := getLength(file)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to get duration of %s\t%s", file, err)
 		return 0, err
 	}
 
-	requiredDuration := reqL * 60
+	requiredLength := reqL * 60
 
-	requiredLoop := math.Ceil(float64(requiredDuration) / float64(fileDuration))
+	requiredLoop := math.Ceil(float64(requiredLength) / float64(length))
 
 	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
 		fmt.Printf("Loop %s %f times\n", file, requiredLoop)
