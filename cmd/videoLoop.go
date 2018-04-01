@@ -44,10 +44,10 @@ Output format is mp4.
 -c and -l are mutually exclusive. -c has precedence over -l.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
-		count, errC := cmd.Flags().GetUint16("count")
-		length, errD := cmd.Flags().GetUint16("length")
+		count, errC := cmd.Flags().GetInt("count")
+		length, errD := cmd.Flags().GetInt("length")
 		crossFade, _ := cmd.Flags().GetBool("withCrossFade")
-		tDuration, _ := cmd.Flags().GetUint16("transitionDuration")
+		tDuration, _ := cmd.Flags().GetInt("transitionDuration")
 
 		if errC != nil && errD != nil {
 			fmt.Fprint(os.Stderr, "Unable to find Count or Length. At least one is required")
@@ -89,20 +89,19 @@ Output format is mp4.
 func init() {
 	rootCmd.AddCommand(videoLoopCmd)
 
-	videoLoopCmd.Flags().Uint16P("count", "c", 3, "Number of times to concatenate the video. Minimum 2.")
-	videoLoopCmd.Flags().Uint16P("length", "l", 0, "Minimum minutes of the video")
+	videoLoopCmd.Flags().IntP("count", "c", 3, "Number of times to concatenate the video. Minimum 2.")
+	videoLoopCmd.Flags().IntP("length", "l", 0, "Minimum minutes of the video")
 	videoLoopCmd.Flags().BoolP("withCrossFade", "x", false, "Concatenate videos with cross fade transition")
-	videoLoopCmd.Flags().Uint16P("transitionDuration", "t", 2, "Transition duration. Default is 2 seconds.")
+	videoLoopCmd.Flags().IntP("transitionDuration", "t", 2, "Transition duration. Default is 2 seconds.")
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
 
-func filterComplexWithCrossFade(count uint16, tDur uint16, length uint16) string {
+func filterComplexWithCrossFade(count int, tDur int, length int) string {
 
 	cf := ""
 	cl := ""
 	cfcl := ""
-	var i uint16 = 1
-	for ; i < count; i++ {
+	for i := 1; i < count; i++ {
 		cf = cf + fmt.Sprintf("[cf%d]", i)
 		cl = cl + fmt.Sprintf("[cl%d]", i)
 		cfcl = cfcl + fmt.Sprintf("[cf%d][cl%d]", i, i)
@@ -134,13 +133,11 @@ func filterComplexWithCrossFade(count uint16, tDur uint16, length uint16) string
 	return a
 }
 
-func createVideoLoopWithTransition(count uint16, tDur uint16, file string, outputFileName string) {
-	l, err := getLength(file)
+func createVideoLoopWithTransition(count int, tDur int, file string, outputFileName string) {
+	length, err := getLength(file)
 	if err != nil {
 		return
 	}
-
-	length := uint16(l)
 
 	if length < tDur {
 		fmt.Fprint(os.Stderr, "Transition duration must be less than video length")
@@ -197,7 +194,7 @@ func getOutputFileName(oPath string, f string, suffix string) string {
 	return filepath.Join(oPath, fn)
 }
 
-func createVideoLoopWithoutTransition(count uint16, e string, output string) {
+func createVideoLoopWithoutTransition(count int, e string, output string) {
 	tmpFile, err := ioutil.TempFile(filepath.Dir(e), getFileNameWithoutExtension(e))
 	if err != nil {
 		log.Fatal(err)
