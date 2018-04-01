@@ -66,16 +66,16 @@ Output format is mp4.
 				if length == 0 && errC == nil && count > 0 {
 					outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count))
 					if !crossFade {
-						createVideoLoopWithoutTransition(count, oPath, e, outputFileName)
+						createVideoLoopWithoutTransition(count, e, outputFileName)
 					} else {
-						createVideoLoopWithTransition(count, tDuration, oPath, e, outputFileName)
+						createVideoLoopWithTransition(count, tDuration, e, outputFileName)
 					}
 				} else if errD == nil && length > 0 {
 					count, err := getRequiredLoop(e, length)
 					if err == nil {
 						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "length", length))
 						if !crossFade {
-							createVideoLoopWithoutTransition(count, oPath, e, outputFileName)
+							createVideoLoopWithoutTransition(count, e, outputFileName)
 						}
 					}
 				}
@@ -131,7 +131,7 @@ func filterComplexWithCrossFade(count uint16, tDur uint16, length uint16) string
 	return a
 }
 
-func createVideoLoopWithTransition(count uint16, tDur uint16, outputPath string, file string, outputFileName string) {
+func createVideoLoopWithTransition(count uint16, tDur uint16, file string, outputFileName string) {
 	l, err := getLength(file)
 	if err != nil {
 		return
@@ -193,7 +193,7 @@ func getOutputFileName(oPath string, f string, suffix string) string {
 	return filepath.Join(oPath, fn)
 }
 
-func createVideoLoopWithoutTransition(count uint16, oPath string, e string, output string) {
+func createVideoLoopWithoutTransition(count uint16, e string, output string) {
 	tmpFile, err := ioutil.TempFile(filepath.Dir(e), getFileNameWithoutExtension(e))
 	if err != nil {
 		log.Fatal(err)
@@ -218,12 +218,11 @@ func createVideoLoopWithoutTransition(count uint16, oPath string, e string, outp
 		log.Fatal(err)
 	}
 
-	runCommandVideoLoopWithoutTransition(count,
-		tmpFile.Name(),
+	runCommandVideoLoopWithoutTransition(tmpFile.Name(),
 		output)
 }
 
-func runCommandVideoLoopWithoutTransition(count uint16, file string, output string) {
+func runCommandVideoLoopWithoutTransition(file string, output string) {
 
 	cmd := exec.Command(app, "-hide_banner",
 		"-f", "concat",
