@@ -63,15 +63,15 @@ Output format is mp4.
 		shouldConcatCountTimes := requiredLength == 0 && errC == nil && count > 2
 		shouldConcatToAchieveLength := !shouldConcatCountTimes && errD == nil && requiredLength > 0
 
+		if !crossFade {
+			tDuration = 0
+		}
+
 		for _, e := range args {
 			if isFileVideo(e) {
 				if shouldConcatCountTimes {
 					outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count))
-					if !crossFade {
-						createVideoLoopWithoutTransition(count, e, outputFileName)
-					} else {
-						createVideoLoopWithTransition(count, tDuration, e, outputFileName)
-					}
+					createVideoLoopWithTransition(count, tDuration, e, outputFileName)
 				} else if shouldConcatToAchieveLength {
 					length, err := getLength(e)
 					if err != nil {
@@ -79,11 +79,10 @@ Output format is mp4.
 					}
 
 					count, err := getRequiredLoopCount(length, requiredLength, tDuration)
+
 					if err == nil {
 						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "requiredLength", length))
-						if !crossFade {
-							createVideoLoopWithoutTransition(count, e, outputFileName)
-						}
+						createVideoLoopWithTransition(count, tDuration, e, outputFileName)
 					}
 				}
 			}
