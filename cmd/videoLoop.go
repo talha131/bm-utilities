@@ -122,8 +122,8 @@ func filterComplexWithCrossFade(count uint16, tDur uint16, dur uint16) string {
 	a = a + "[fadeout]fifo[fadeoutfifo]; "
 	a = a + "[fadeoutfifo][fadeinfifo]overlay[crossfade]; "
 
-	a = a + "[crossfade] split " + cf + "; "
-	a = a + "[clip2] split " + cl + "; "
+	a = a + fmt.Sprintf("[crossfade] split=%d %s ; ", count-1, cf)
+	a = a + fmt.Sprintf("[clip2] split=%d %s ; ", count-1, cl)
 
 	a = a + "[clip1]" + cfcl + "[clip3]"
 	a = a + fmt.Sprintf("concat=n=%d:v=1[output]", count*2)
