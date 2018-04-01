@@ -81,7 +81,7 @@ Output format is mp4.
 					count, err := getRequiredLoopCount(length, requiredLength, tDuration)
 
 					if err == nil {
-						outputFileName := getOutputFileName(oPath, e, "length", length)
+						outputFileName := getOutputFileName(oPath, e, "length", requiredLength)
 						createVideoLoopWithTransition(count, tDuration, e, outputFileName)
 					}
 				}
