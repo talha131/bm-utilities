@@ -60,17 +60,19 @@ Output format is mp4.
 		}
 
 		oPath := createOutputDirectory(cmd)
+		shouldConcatCountTimes := length == 0 && errC == nil && count > 0
+		shouldConcatToAchieveLength := !shouldConcatCountTimes && errD == nil && length > 0
 
 		for _, e := range args {
 			if isFileVideo(e) {
-				if length == 0 && errC == nil && count > 0 {
+				if shouldConcatCountTimes {
 					outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count))
 					if !crossFade {
 						createVideoLoopWithoutTransition(count, e, outputFileName)
 					} else {
 						createVideoLoopWithTransition(count, tDuration, e, outputFileName)
 					}
-				} else if errD == nil && length > 0 {
+				} else if shouldConcatToAchieveLength {
 					count, err := getRequiredLoop(e, length)
 					if err == nil {
 						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "length", length))
