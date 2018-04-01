@@ -118,7 +118,7 @@ func createOutputDirectory(cmd *cobra.Command) string {
 	return o
 }
 
-func getDuration(file string) (int, error) {
+func getLength(file string) (int, error) {
 
 	out, err := exec.Command("sh", "-c", "ffmpeg -i "+file+
 		" 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,//").Output()

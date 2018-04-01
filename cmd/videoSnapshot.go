@@ -53,7 +53,7 @@ at highest quality.
 		for _, e := range args {
 			if isFileVideo(e) {
 				timestamp := "2"
-				if d, e := getDuration(e); e != nil || d < 2 {
+				if d, e := getLength(e); e != nil || d < 2 {
 					continue
 				}
 
@@ -82,7 +82,7 @@ func init() {
 }
 
 func getMidTimestamp(file string) (string, error) {
-	fileDuration, err := getDuration(file)
+	fileDuration, err := getLength(file)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to get duration of %s\t%s", file, err)
 		return "00", err

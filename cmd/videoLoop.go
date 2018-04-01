@@ -38,19 +38,19 @@ import (
 var videoLoopCmd = &cobra.Command{
 	Use:   "videoLoop",
 	Short: "Concatenate same video multiple times to create a loop",
-	Long: `Creates loop of a video by contactenating it multiple times.
+	Long: `Creates loop of a video by concatenating it multiple times.
 Output format is mp4.
 
--c and -d are mutually exclusive. -c has precendence over -d.
+-c and -l are mutually exclusive. -c has precedence over -l.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		count, errC := cmd.Flags().GetUint16("count")
-		duration, errD := cmd.Flags().GetUint16("duration")
+		length, errD := cmd.Flags().GetUint16("length")
 		crossFade, _ := cmd.Flags().GetBool("withCrossFade")
-		transitionDuration, _ := cmd.Flags().GetUint16("transitionDuration")
+		tDuration, _ := cmd.Flags().GetUint16("transitionDuration")
 
 		if errC != nil && errD != nil {
-			fmt.Fprint(os.Stderr, "Unable to find Count or Duration. At least one is required")
+			fmt.Fprint(os.Stderr, "Unable to find Count or Length. At least one is required")
 			return
 		}
 
@@ -63,17 +63,17 @@ Output format is mp4.
 
 		for _, e := range args {
 			if isFileVideo(e) {
-				if duration == 0 && errC == nil && count > 0 {
+				if length == 0 && errC == nil && count > 0 {
 					outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "loop", count))
 					if !crossFade {
 						createVideoLoopWithoutTransition(count, oPath, e, outputFileName)
 					} else {
-						createVideoLoopWithTransition(count, transitionDuration, oPath, e, outputFileName)
+						createVideoLoopWithTransition(count, tDuration, oPath, e, outputFileName)
 					}
-				} else if errD == nil && duration > 0 {
-					count, err := getRequiredLoop(e, duration)
+				} else if errD == nil && length > 0 {
+					count, err := getRequiredLoop(e, length)
 					if err == nil {
-						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "duration", duration))
+						outputFileName := getOutputFileName(oPath, e, fmt.Sprintf("%s-%d", "length", length))
 						if !crossFade {
 							createVideoLoopWithoutTransition(count, oPath, e, outputFileName)
 						}
@@ -88,7 +88,7 @@ func init() {
 	rootCmd.AddCommand(videoLoopCmd)
 
 	videoLoopCmd.Flags().Uint16P("count", "c", 3, "Number of times to concatenate the video. Minimum 2.")
-	videoLoopCmd.Flags().Uint16P("duration", "d", 0, "Minimum minutes of the video")
+	videoLoopCmd.Flags().Uint16P("length", "l", 0, "Minimum minutes of the video")
 	videoLoopCmd.Flags().BoolP("withCrossFade", "x", false, "Concatenate videos with cross fade transition")
 	videoLoopCmd.Flags().Uint16P("transitionDuration", "t", 2, "Transition duration. Default is 2 seconds.")
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
@@ -132,18 +132,18 @@ func filterComplexWithCrossFade(count uint16, tDur uint16, dur uint16) string {
 }
 
 func createVideoLoopWithTransition(count uint16, tDur uint16, outputPath string, file string, outputFileName string) {
-	d, err := getDuration(file)
+	l, err := getLength(file)
 	if err != nil {
 		return
 	}
 
-	dur := uint16(d)
+	length := uint16(l)
 
-	if dur < tDur {
+	if length < tDur {
 		fmt.Fprint(os.Stderr, "Transition duration must be less than video length")
 	}
 
-	fc := filterComplexWithCrossFade(count, tDur, dur)
+	fc := filterComplexWithCrossFade(count, tDur, length)
 
 	if v, _ := rootCmd.Flags().GetBool("verbose"); v {
 		fmt.Printf("filter_complex is\n%s\n", fc)
@@ -164,19 +164,19 @@ func createVideoLoopWithTransition(count uint16, tDur uint16, outputPath string,
 	}
 }
 
-func getRequiredLoop(file string, reqD uint16) (uint16, error) {
-	if reqD == 0 {
+func getRequiredLoop(file string, reqL uint16) (uint16, error) {
+	if reqL == 0 {
 		fmt.Fprintf(os.Stderr, "Required duration is invalid")
 		return 0, errors.New("Required duration is 0")
 	}
 
-	fileDuration, err := getDuration(file)
+	fileDuration, err := getLength(file)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to get duration of %s\t%s", file, err)
 		return 0, err
 	}
 
-	requiredDuration := reqD * 60
+	requiredDuration := reqL * 60
 
 	requiredLoop := math.Ceil(float64(requiredDuration) / float64(fileDuration))
 
@@ -194,12 +194,12 @@ func getOutputFileName(oPath string, f string, suffix string) string {
 }
 
 func createVideoLoopWithoutTransition(count uint16, oPath string, e string, output string) {
-	tmpfile, err := ioutil.TempFile(filepath.Dir(e), getFileNameWithoutExtension(e))
+	tmpFile, err := ioutil.TempFile(filepath.Dir(e), getFileNameWithoutExtension(e))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer os.Remove(tmpfile.Name()) // clean up
+	defer os.Remove(tmpFile.Name()) // clean up
 
 	p, _ := filepath.Abs(e)
 
@@ -211,15 +211,15 @@ func createVideoLoopWithoutTransition(count uint16, oPath string, e string, outp
 
 	lineR := strings.Repeat(line, int(count))
 
-	if _, err := tmpfile.WriteString(lineR); err != nil {
+	if _, err := tmpFile.WriteString(lineR); err != nil {
 		log.Fatal(err)
 	}
-	if err := tmpfile.Close(); err != nil {
+	if err := tmpFile.Close(); err != nil {
 		log.Fatal(err)
 	}
 
 	runCommandVideoLoopWithoutTransition(count,
-		tmpfile.Name(),
+		tmpFile.Name(),
 		output)
 }
 
