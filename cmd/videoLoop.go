@@ -60,7 +60,7 @@ Output format is mp4.
 		}
 
 		oPath := createOutputDirectory(cmd)
-		shouldConcatCountTimes := requiredLength == 0 && errC == nil && count > 0
+		shouldConcatCountTimes := requiredLength == 0 && errC == nil && count > 2
 		shouldConcatToAchieveLength := !shouldConcatCountTimes && errD == nil && requiredLength > 0
 
 		for _, e := range args {
