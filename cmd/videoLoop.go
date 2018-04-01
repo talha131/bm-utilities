@@ -45,7 +45,7 @@ Output format is mp4.
 `,
 	Run: func(cmd *cobra.Command, args []string) {
 		count, errC := cmd.Flags().GetInt("count")
-		length, errD := cmd.Flags().GetInt("length")
+		requiredLength, errD := cmd.Flags().GetInt("length")
 		crossFade, _ := cmd.Flags().GetBool("withCrossFade")
 		tDuration, _ := cmd.Flags().GetInt("transitionDuration")
 
@@ -60,8 +60,8 @@ Output format is mp4.
 		}
 
 		oPath := createOutputDirectory(cmd)
-		shouldConcatCountTimes := length == 0 && errC == nil && count > 0
-		shouldConcatToAchieveLength := !shouldConcatCountTimes && errD == nil && length > 0
+		shouldConcatCountTimes := requiredLength == 0 && errC == nil && count > 0
+		shouldConcatToAchieveLength := !shouldConcatCountTimes && errD == nil && requiredLength > 0
 
 		for _, e := range args {
 			if isFileVideo(e) {
