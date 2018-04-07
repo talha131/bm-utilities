@@ -100,41 +100,51 @@ func init() {
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
 
-func filterComplexWithCrossFade(count int, tDur int, length int) string {
+func filterComplexWithCrossFade(count int, tDur int, length int) (flt string) {
 
 	cf := ""
-	cl := ""
+	cl1 := ""
+	cl2 := ""
 	cfcl := ""
 	for i := 1; i < count; i++ {
 		cf = cf + fmt.Sprintf("[cf%d]", i)
-		cl = cl + fmt.Sprintf("[cl%d]", i)
-		cfcl = cfcl + fmt.Sprintf("[cf%d][cl%d]", i, i)
+		cl1 = cl1 + fmt.Sprintf("[cl1%d]", i)
+		cl2 = cl2 + fmt.Sprintf("[cl2%d]", i)
+		cfcl = cfcl + fmt.Sprintf("[cf%d][cl2%d]", i, i)
 	}
 
-	var a string
-
 	// length = 15, tDur = 5
-	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[clip1]; ", length-tDur)               // 0 - 10
-	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip2]; ", tDur, length-tDur)        // 5 - 10
-	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip3]; ", length-tDur, length)      // 10 - 15
-	a = a + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", length-tDur, length) // 10 - 15
-	a = a + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", tDur)                  // 0 - 5
+	flt = flt + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[clip1]; ", length-tDur) // 0 - 10
 
-	a = a + fmt.Sprintf("[fadeinsrc]format=pix_fmts=yuva420p, fade=t=in:st=0:d=%d:alpha=1[fadein]; ", tDur)
-	a = a + fmt.Sprintf("[fadeoutsrc]format=pix_fmts=yuva420p, fade=t=out:st=0:d=%d:alpha=1[fadeout]; ", tDur)
+	if tDur > 0 {
+		flt = flt + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip2]; ", tDur, length-tDur)        // 5 - 10
+		flt = flt + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[clip3]; ", length-tDur, length)      // 10 - 15
+		flt = flt + fmt.Sprintf("[0:v]trim=start=%d:end=%d,setpts=PTS-STARTPTS[fadeoutsrc]; ", length-tDur, length) // 10 - 15
+		flt = flt + fmt.Sprintf("[0:v]trim=start=0:end=%d,setpts=PTS-STARTPTS[fadeinsrc]; ", tDur)                  // 0 - 5
 
-	a = a + "[fadein]fifo[fadeinfifo]; "
-	a = a + "[fadeout]fifo[fadeoutfifo]; "
-	a = a + "[fadeoutfifo][fadeinfifo]overlay[crossfade]; "
+		flt = flt + fmt.Sprintf("[fadeinsrc]format=pix_fmts=yuva420p, fade=t=in:st=0:d=%d:alpha=1[fadein]; ", tDur)
+		flt = flt + fmt.Sprintf("[fadeoutsrc]format=pix_fmts=yuva420p, fade=t=out:st=0:d=%d:alpha=1[fadeout]; ", tDur)
 
-	a = a + fmt.Sprintf("[crossfade] split=%d %s ; ", count-1, cf)
-	a = a + fmt.Sprintf("[clip2] split=%d %s ; ", count-1, cl)
+		flt = flt + "[fadein]fifo[fadeinfifo]; "
+		flt = flt + "[fadeout]fifo[fadeoutfifo]; "
+		flt = flt + "[fadeoutfifo][fadeinfifo]overlay[crossfade]; "
 
-	a = a + "[clip1]" + cfcl + "[clip3]"
+		flt = flt + fmt.Sprintf("[crossfade] split=%d %s ; ", count-1, cf)
+		flt = flt + fmt.Sprintf("[clip2] split=%d %s ; ", count-1, cl2)
+		flt = flt + "[clip1]" + cfcl + "[clip3]"
+	} else {
+		flt = flt + fmt.Sprintf("[clip1] split=%d %s [cli1]; ", count, cl1)
+		flt = flt + "[cli1]" + cl1
+	}
+
 	// Final number of clips to concatenate is twice of count
-	a = a + fmt.Sprintf("concat=n=%d:v=1[output]", count*2)
+	i := count
+	if tDur > 0 {
+		i = count * 2
+	}
+	flt = flt + fmt.Sprintf("concat=n=%d:v=1[output]", i)
 
-	return a
+	return flt
 }
 
 func createVideoLoopWithTransition(count int, tDur int, file string, outputFileName string) {
