@@ -71,19 +71,20 @@ Output format is mp4.
 			if isFileVideo(e) {
 				if shouldConcatCountTimes {
 					outputFileName := getOutputFileName(oPath, e, "loop", count)
-					createVideoLoopWithTransition(count, tDuration, e, outputFileName)
+					createVideoLoop(count, e, outputFileName, tDuration, crossFade)
 				} else if shouldConcatToAchieveLength {
 					length, err := getLength(e)
 					if err != nil {
-						return
+						continue
 					}
 
 					count, err := getRequiredLoopCount(length, requiredLength, tDuration)
-
-					if err == nil {
-						outputFileName := getOutputFileName(oPath, e, "length", requiredLength)
-						createVideoLoopWithTransition(count, tDuration, e, outputFileName)
+					if err != nil {
+						continue
 					}
+
+					outputFileName := getOutputFileName(oPath, e, "length", requiredLength)
+					createVideoLoop(count, e, outputFileName, tDuration, crossFade)
 				}
 			}
 		}
@@ -98,6 +99,14 @@ func init() {
 	videoLoopCmd.Flags().BoolP("withCrossFade", "x", false, "Concatenate videos with cross fade transition")
 	videoLoopCmd.Flags().IntP("transitionDuration", "t", 2, "Transition duration. Default is 2 seconds.")
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
+}
+
+func createVideoLoop(count int, e string, outputFileName string, tDuration int, crossFade bool) {
+	if crossFade {
+		createVideoLoopWithTransition(count, tDuration, e, outputFileName)
+	} else {
+		createVideoLoopWithoutTransition(count, e, outputFileName)
+	}
 }
 
 func filterComplexWithCrossFade(count int, tDur int, length int) (filter string) {
