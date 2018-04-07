@@ -29,15 +29,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// renameCmd represents the rename command
-var renameCmd = &cobra.Command{
-	Use:   "rename",
+// fileRenameCmd represents the rename command
+var fileRenameCmd = &cobra.Command{
+	Use:   "fileRename",
 	Short: "Rename file to its ModTime",
 	Long: `Rename file to the modification time of file.
 
 Usage:
 
-$ bmtool file rename example.mp3 
+$ bmtool fileRename example.mp3 
 This will rename "example.mp3" to "2016-11-04 130738.mp3"
 `,
 	Args: cobra.MinimumNArgs(1),
@@ -56,7 +56,7 @@ This will rename "example.mp3" to "2016-11-04 130738.mp3"
 }
 
 func init() {
-	fileCmd.AddCommand(renameCmd)
+	rootCmd.AddCommand(fileRenameCmd)
 }
 
 func rename(file string, newName string) {

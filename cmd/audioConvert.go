@@ -29,12 +29,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// convertCmd represents the convert command
-var convertCmd = &cobra.Command{
-	Use:   "convert",
+// audioConvertCmd represents the audioConvert command
+var audioConvertCmd = &cobra.Command{
+	Use:   "audioConvert",
 	Short: "Convert audio file to wav or mp3",
 	Long: `Convert audio file to wav or mp3 format.
-Alongwith format conversion, it also
+Along with format conversion, it also
 
 1. Convert stereo to mono
 2. Set audio sample frequency to 44100
@@ -89,10 +89,10 @@ It will convert "example.wav" to "example.mp3" in ./eg directory
 }
 
 func init() {
-	audioCmd.AddCommand(convertCmd)
+	rootCmd.AddCommand(audioConvertCmd)
 
-	convertCmd.Flags().StringP("format", "f", "wav", "Output format. [mp3|wav]")
-	convertCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
+	audioConvertCmd.Flags().StringP("format", "f", "wav", "Output format. [mp3|wav]")
+	audioConvertCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
 
 func convertFile(input []string, output []string) {
