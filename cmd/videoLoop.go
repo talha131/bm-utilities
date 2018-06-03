@@ -94,10 +94,10 @@ Output format is mp4.
 func init() {
 	rootCmd.AddCommand(videoLoopCmd)
 
-	videoLoopCmd.Flags().IntP("count", "c", 3, "Number of times to concatenate the video. Minimum 2.")
-	videoLoopCmd.Flags().IntP("length", "l", 0, "Minimum minutes of the video")
-	videoLoopCmd.Flags().BoolP("withCrossFade", "x", false, "Concatenate videos with cross fade transition")
-	videoLoopCmd.Flags().IntP("transitionDuration", "t", 2, "Transition duration. Default is 2 seconds.")
+	videoLoopCmd.Flags().IntP("count", "c", 3, "Number of times to concatenate the video. Minimum 2. Default 3.")
+	videoLoopCmd.Flags().IntP("length", "l", 0, "Minimum seconds of the video. Default 0 seconds")
+	videoLoopCmd.Flags().BoolP("withCrossFade", "x", false, "Concatenate videos with cross fade transition. Default false.")
+	videoLoopCmd.Flags().IntP("transitionDuration", "t", 2, "Transition duration. Default 2 seconds.")
 	videoLoopCmd.Flags().StringP("outputDirectory", "o", "", "Output directory path. Default is current.")
 }
 
