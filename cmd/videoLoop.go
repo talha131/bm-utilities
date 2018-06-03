@@ -74,7 +74,7 @@ Output format is mp4.
 					createVideoLoop(count, e, outputFileName, tDuration, crossFade)
 				} else if shouldConcatToAchieveLength {
 					length, err := getLength(e)
-					if err != nil {
+					if err != nil && length <= 0 {
 						continue
 					}
 
