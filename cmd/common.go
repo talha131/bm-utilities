@@ -144,7 +144,6 @@ func getLength(file string) (int, error) {
 		return 0, err
 	}
 
-	fmt.Println("lenth")
 	hourInt := int(math.Floor(hourFloat))
 
 	minute := strings.Replace(split[1], "\n", "", -1)
