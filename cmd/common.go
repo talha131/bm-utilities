@@ -22,15 +22,15 @@ package cmd
 
 import (
 	"fmt"
-	"math"
 	"mime"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"errors"
+	"math"
+	"os/exec"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -122,7 +122,7 @@ func createOutputDirectory(cmd *cobra.Command) string {
 
 func getLength(file string) (int, error) {
 
-	out, err := exec.Command("sh", "-c", "ffmpeg -i "+file+
+	out, err := exec.Command("sh", "-c", "ffmpeg -i ", file,
 		" 2>&1 | grep Duration | cut -d ' ' -f 4 | sed s/,//").Output()
 	if err != nil {
 		return 0, err
@@ -133,6 +133,7 @@ func getLength(file string) (int, error) {
 		fmt.Fprint(os.Stderr, "Duration is empty")
 		return 0, errors.New("failed to read duration")
 	}
+
 	split := strings.Split(outString, ":")
 
 	var seconds int
@@ -165,5 +166,4 @@ func getLength(file string) (int, error) {
 	seconds = (hourInt * 3600) + (minuteInt * 60) + (secondInt)
 
 	return seconds, nil
-
 }
