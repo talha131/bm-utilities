@@ -30,6 +30,8 @@ import (
 	"strconv"
 	"strings"
 
+	"errors"
+
 	"github.com/spf13/cobra"
 )
 
@@ -127,6 +129,10 @@ func getLength(file string) (int, error) {
 	}
 
 	outString := string(out[:])
+	if len(outString) == 0 {
+		fmt.Fprint(os.Stderr, "Duration is empty")
+		return 0, errors.New("failed to read duration")
+	}
 	split := strings.Split(outString, ":")
 
 	var seconds int
@@ -137,6 +143,7 @@ func getLength(file string) (int, error) {
 		return 0, err
 	}
 
+	fmt.Println("lenth")
 	hourInt := int(math.Floor(hourFloat))
 
 	minute := strings.Replace(split[1], "\n", "", -1)
