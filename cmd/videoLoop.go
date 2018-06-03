@@ -162,6 +162,7 @@ func createVideoLoopWithTransition(count int, tDur int, file string, outputFileN
 
 	cmd := exec.Command(app, "-hide_banner",
 		"-i", file,
+		"-f", "mp4", "-vcodec", "libx264", "-preset", "fast", "-profile:v", "main", "-movflags", "+faststart",
 		"-an", "-filter_complex",
 		fc,
 		"-map", "[output]",
